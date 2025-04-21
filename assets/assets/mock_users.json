@@ -1,0 +1,30 @@
+[
+    {
+      "id": 1,
+      "name": "سارة",
+      "age": 28,
+      "region": "عمان",
+      "education": "بكالوريوس",
+      "height": 165,
+      "status": "عزباء"
+    },
+    {
+      "id": 2,
+      "name": "محمد",
+      "age": 34,
+      "region": "إربد",
+      "education": "ماجستير",
+      "height": 175,
+      "status": "أعزب"
+    },
+    {
+      "id": 3,
+      "name": "رنا",
+      "age": 25,
+      "region": "الزرقاء",
+      "education": "دبلوم",
+      "height": 160,
+      "status": "مطلقة"
+    }
+  ]
+  
