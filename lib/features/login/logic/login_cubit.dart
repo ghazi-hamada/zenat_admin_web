@@ -15,13 +15,21 @@ class LoginCubit extends Cubit<LoginState> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isPasswordVisible = true;
+
+  void togglePasswordVisibility() {
+    emit(LoginLoading());
+    isPasswordVisible = !isPasswordVisible;
+    emit(LoginInitial());
+  }
+
   PostData postData = PostData(Crud());
 
   void login() async {
     if (formKey.currentState!.validate()) {
       emit(LoginLoading());
       try {
-        Either<String, Map<dynamic, dynamic>> response = await postData
+        Either<String, dynamic> response = await postData
             .postData(
               linkurl: AppApiString.LOGIN,
               data: {
@@ -30,13 +38,37 @@ class LoginCubit extends Cubit<LoginState> {
               },
             );
         print(response);
-        response.fold((l) => print(l), (r) => print(r));
         response.fold(
           (l) {
             emit(LoginFailure(l));
           },
           (r) async {
             await SharedPrefHelper.setData(SharedPrefKeys.isLogin, 'true');
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userId,
+              r['data']['users_id'],
+            );
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userName,
+              r['data']['users_name'].toString(),
+            );
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userEmail,
+              r['data']['users_email'].toString(),
+            );
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userImage,
+              r['data']['users_image'].toString(),
+            );
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userPhone,
+              r['data']['users_phone'].toString(),
+            );
+            await SharedPrefHelper.setData(
+              SharedPrefKeys.userBirthDate,
+              r['data']['users_birth_date'].toString(),
+            );
+
             emit(LoginSuccess());
           },
         );

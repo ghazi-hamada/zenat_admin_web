@@ -11,7 +11,7 @@ class PostData {
   Crud crud;
   PostData(this.crud);
 
-  Future<Either<String, Map>> postData({
+  Future<Either<String, Map<String, dynamic>>> postData({
     required String linkurl,
     required Map<String, dynamic> data,
     File? file, // دعم رفع الملفات
@@ -41,7 +41,7 @@ class PostData {
 
         // تحويل الاستجابة إلى خريطة (Map) وفحص المفتاح 'status'
         if (response.statusCode == 200) {
-          var responseMap = jsonDecode(response.body);
+          Map<String, dynamic> responseMap = jsonDecode(response.body);
 
           // تحقق من قيمة 'status'
           if (responseMap['status'] == 'success') {
@@ -61,10 +61,7 @@ class PostData {
           data,
         );
 
-        return response.fold(
-          (l) => Left(l), // إذا كان هناك خطأ
-          (r) => Right(r), // إذا كانت الاستجابة ناجحة
-        );
+        return response;
       }
     } catch (e) {
       log("Error: $e");

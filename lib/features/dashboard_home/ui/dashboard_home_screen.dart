@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zenat_admin_web/core/functions/extensions.dart';
 import 'package:zenat_admin_web/core/helper/shared_pref_helper.dart';
 import 'package:zenat_admin_web/core/routing/routes.dart';
 import 'package:zenat_admin_web/core/static/app_api_string.dart';
+import 'package:zenat_admin_web/features/chats/logic/chats/chats_cubit.dart';
+import 'package:zenat_admin_web/features/chats/ui/chats_screen.dart';
+import 'package:zenat_admin_web/features/complaint/ui/complaint_screen.dart';
 import 'package:zenat_admin_web/features/dashboard_home/data/loadMockUsers.dart';
 import 'package:zenat_admin_web/features/dashboard_home/data/user_model.dart';
+import 'package:zenat_admin_web/features/overview/ui/overview_screen.dart';
+import 'package:zenat_admin_web/features/settings/logic/settings_cubit.dart'
+    show SettingsCubit;
+import 'package:zenat_admin_web/features/settings/ui/settings_screen.dart';
+import 'package:zenat_admin_web/features/stories/logic/stories_cubit.dart';
+import 'package:zenat_admin_web/features/stories/ui/stories_screen.dart'
+    show StoriesScreen;
+import 'package:zenat_admin_web/features/subscriptions/ui/subscriptions_screen.dart';
+import 'package:zenat_admin_web/features/users/ui/users_screen.dart';
+import 'package:zenat_admin_web/generated/l10n.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -16,17 +30,17 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int selectedIndex = 0;
   OverlayEntry? _overlayEntry;
-  final List<String> pageTitles = [
-    'نظرة عامة',
-    'المستخدمين',
-    'طلبات التوافق',
-    'الإعجابات',
-    'المحظورين',
-    'الإعدادات',
-  ];
 
   @override
   Widget build(BuildContext context) {
+    // final List<String> pageTitles = [
+    //   S.of(context).overviewTitle,
+    //   S.of(context).usersTitle,
+    //   S.of(context).compatibilityRequests,
+    //   S.of(context).likes,
+    //   S.of(context).blockedUsers,
+    //   S.of(context).settings,
+    // ];
     return Scaffold(
       backgroundColor: Colors.white,
       body: Row(
@@ -51,30 +65,34 @@ class _DashboardPageState extends State<DashboardPage> {
                     selectedLabelTextStyle: const TextStyle(
                       color: Color(0xFFFB962B),
                     ),
-                    destinations: const [
+                    destinations: [
                       NavigationRailDestination(
-                        icon: Icon(Icons.dashboard),
-                        label: Text('نظرة عامة'),
+                        icon: const Icon(Icons.dashboard),
+                        label: Text(S.of(context).overviewTitle),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.people),
-                        label: Text('المستخدمين'),
+                        icon: const Icon(Icons.people),
+                        label: Text(S.of(context).usersTitle),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.favorite),
-                        label: Text('طلبات التوافق'),
+                        icon: const Icon(Icons.chat),
+                        label: Text(S.of(context).chatsTitle),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.thumb_up),
-                        label: Text('الإعجابات'),
+                        icon: const Icon(Icons.subscriptions),
+                        label: Text(S.of(context).subscriptionsTitle),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.block),
-                        label: Text('المحظورين'),
+                        icon: const Icon(Icons.report),
+                        label: Text(S.of(context).complaintsTitle),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.settings),
-                        label: Text('الإعدادات'),
+                        icon: const Icon(Icons.book),
+                        label: Text(S.of(context).storiesTitle),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.settings),
+                        label: Text(S.of(context).settings),
                       ),
                     ],
                   ),
@@ -110,137 +128,32 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        return _overviewPage();
+        return OverviewScreen();
       case 1:
-        return _usersPage();
+        return UsersScreen();
       case 2:
-        return _requestsPage();
+        return BlocProvider(
+          create: (context) => ChatsCubit(),
+          child: ChatsScreen(),
+        );
       case 3:
-        return _likesPage();
+        return SubscriptionsScreen();
       case 4:
-        return _blockedPage();
+        return ComplaintScreen();
       case 5:
-        return _settingsPage();
+        return BlocProvider(
+          create: (context) => StoriesCubit(),
+          child: StoriesScreen(),
+        );
+      case 6:
+        return BlocProvider(
+          create: (context) => SettingsCubit()..init(),
+          child: SettingsScreen(currentUserRole: 1),
+        );
+
       default:
-        return const Center(child: Text('صفحة غير موجودة'));
+        return Center(child: Text(S.of(context).pageNotFound));
     }
-  }
-
-  Widget _overviewPage() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'نظرة عامة',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 20,
-          runSpacing: 20,
-          children: const [
-            _StatCard(
-              title: 'عدد المستخدمين',
-              value: '1245',
-              icon: Icons.people,
-            ),
-            _StatCard(
-              title: 'طلبات التوافق',
-              value: '310',
-              icon: Icons.favorite,
-            ),
-            _StatCard(
-              title: 'الإعجابات المرسلة',
-              value: '890',
-              icon: Icons.thumb_up,
-            ),
-            _StatCard(title: 'عدد المحظورين', value: '45', icon: Icons.block),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _usersPage() {
-    return FutureBuilder<List<User>>(
-      future: loadMockUsers(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('حدث خطأ أثناء تحميل المستخدمين'));
-        } else {
-          final users = snapshot.data!;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('الاسم')),
-                DataColumn(label: Text('العمر')),
-                DataColumn(label: Text('المنطقة')),
-                DataColumn(label: Text('التعليم')),
-                DataColumn(label: Text('الطول')),
-                DataColumn(label: Text('الحالة')),
-              ],
-              rows:
-                  users.map((user) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(user.name)),
-                        DataCell(Text('${user.age}')),
-                        DataCell(Text(user.region)),
-                        DataCell(Text(user.education)),
-                        DataCell(Text('${user.height}')),
-                        DataCell(Text(user.status)),
-                      ],
-                    );
-                  }).toList(),
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  Widget _requestsPage() {
-    return const Center(child: Text('طلبات التوافق'));
-  }
-
-  Widget _likesPage() {
-    return const Center(child: Text('الإعجابات'));
-  }
-
-  Widget _blockedPage() {
-    return const Center(child: Text('المستخدمين المحظورين'));
-  }
-
-  Widget _settingsPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('الإعدادات العامة'),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final shouldLogout = await _showLogoutConfirmationDialog();
-              if (shouldLogout) {
-                // Perform logout logic here
-                Navigator.of(context).pushReplacementNamed('/login');
-              }
-            },
-            icon: const Icon(Icons.logout),
-            label: const Text('تسجيل الخروج'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFB962B),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              textStyle: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<bool> _showLogoutConfirmationDialog() async {
@@ -248,64 +161,20 @@ class _DashboardPageState extends State<DashboardPage> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('تأكيد تسجيل الخروج'),
-                content: const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+                title: Text(S.of(context).logoutConfirmationTitle),
+                content: Text(S.of(context).logoutConfirmationMessage),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('إلغاء'),
+                    child: Text(S.of(context).cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('تأكيد'),
+                    child: Text(S.of(context).confirm),
                   ),
                 ],
               ),
         ) ??
         false;
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 220,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 30, color: Color(0xFFFB962B)),
-          const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
   }
 }

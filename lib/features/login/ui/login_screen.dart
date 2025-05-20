@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zenat_admin_web/core/functions/extensions.dart';
 import 'package:zenat_admin_web/core/routing/routes.dart';
 import 'package:zenat_admin_web/features/login/logic/login_cubit.dart';
+import 'package:zenat_admin_web/generated/l10n.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = S.of(context)!;
     const primaryColor = Color(0xFFFB962B);
     var cubit = context.read<LoginCubit>();
     return Scaffold(
@@ -28,22 +30,20 @@ class LoginScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('images/logo.png', width: 250),
-                        SizedBox(height: 170),
+                        Image.asset('assets/images/logo.png', width: 250),
+                        const SizedBox(height: 170),
                         Text(
-                          'لوحة التحكم - زينات',
-                          style: TextStyle(
+                          localizations.adminPanelTitle,
+                          style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
-                          'مرحباً بك في لوحة إدارة تطبيق زينات. من هنا يمكنك إدارة الحسابات، مراجعة البيانات، التحكم بالمحتوى، والإشراف على التجربة الكاملة للمستخدمين.\n\n'
-                          'يرجى التأكد أنك تملك صلاحية الدخول إلى هذه اللوحة. أي استخدام غير مصرح به قد يؤدي إلى الملاحقة.\n\n'
-                          'نسعى دائماً لتقديم منصة آمنة ومحترمة لجميع المستخدمين، ودورك في الإدارة جزء أساسي من ذلك.',
-                          style: TextStyle(
+                          localizations.adminPanelDescription,
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black87,
                             height: 1.6,
@@ -78,10 +78,10 @@ class LoginScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
-                            'تسجيل الدخول للوحة الإدارة',
+                          Text(
+                            localizations.loginTitle,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.black87,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -95,34 +95,60 @@ class LoginScreen extends StatelessWidget {
                                 TextFormField(
                                   controller: cubit.usernameController,
                                   decoration: InputDecoration(
-                                    labelText:
-                                        'اسم المستخدم أو البريد الإلكتروني',
+                                    labelText: localizations.usernameOrEmail,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'يرجى ادخال اسم المستخدم';
+                                      return localizations.enterUsername;
                                     }
                                     return null;
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: cubit.passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    labelText: 'كلمة المرور',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'يرجى ادخال كلمة المرور';
-                                    }
-                                    return null;
+                                BlocBuilder<LoginCubit, LoginState>(
+                                  builder: (context, state) {
+                                    return TextFormField(
+                                      controller: cubit.passwordController,
+                                      obscureText: cubit.isPasswordVisible,
+
+                                      decoration: InputDecoration(
+                                        suffixIcon:
+                                            !cubit.isPasswordVisible
+                                                ? IconButton(
+                                                  icon: const Icon(
+                                                    Icons.visibility,
+                                                  ),
+                                                  onPressed: () {
+                                                    cubit
+                                                        .togglePasswordVisibility();
+                                                  },
+                                                )
+                                                : IconButton(
+                                                  icon: const Icon(
+                                                    Icons.visibility_off,
+                                                  ),
+                                                  onPressed: () {
+                                                    cubit
+                                                        .togglePasswordVisibility();
+                                                  },
+                                                ),
+                                        labelText: localizations.password,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return localizations.enterPassword;
+                                        }
+                                        return null;
+                                      },
+                                    );
                                   },
                                 ),
                               ],
@@ -171,8 +197,8 @@ class LoginScreen extends StatelessWidget {
                                   );
                                 }
                                 return Text(
-                                  'تسجيل الدخول',
-                                  style: TextStyle(
+                                  localizations.loginButton,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
                                   ),
@@ -181,32 +207,12 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              'هل نسيت كلمة المرور؟',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: primaryColor),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: const Text(
-                              'إنشاء حساب جديد',
-                              style: TextStyle(color: primaryColor),
-                            ),
-                          ),
+
                           const SizedBox(height: 32),
-                          const Center(
+                          Center(
                             child: Text(
-                              '© 2025 Zinat',
-                              style: TextStyle(
+                              localizations.copyright,
+                              style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 12,
                               ),
